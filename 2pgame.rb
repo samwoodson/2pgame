@@ -10,7 +10,6 @@ OPERATIONS = [:+, :*, :-]
     lives: LIVES,
     score: 0,
     name: ''
-
   },
   {
     id: 2,
@@ -28,7 +27,7 @@ def generate_question
 end
 
 def prompt(player_num)
-  puts "#{@players[player_num - 1][:name]}: What is #{@num1} #{@sign} #{@num2}?"
+  puts "\n#{@players[player_num - 1][:name]}: What is #{@num1} #{@sign} #{@num2}?"
   @response = gets.chomp.to_i
 end
 
@@ -59,15 +58,15 @@ end
 
 def show_scores
   puts "#{@players[0][:name]} your score is #{@players[0][:score]}."
-  puts "#{@players[1][:name]} your score is #{@players[1][:score]}."
+  puts "#{@players[1][:name]} your score is #{@players[1][:score]}.\n"
 end
 
 def checkforloser(player_key)
   if @players[player_key - 1][:lives] == 1 && !verify
-    abort("\e[31m\nWrong! #{@players[player_key - 1][:name]}, you have lost all your lives, game over!\n\e[0m"\
+    puts "\e[31m\nWrong! #{@players[player_key - 1][:name]}, you have lost all your lives, game over!\e[0m"\
           "\e[32m\n#{@players[0][:name]} your score was #{@players[0][:score]}, "\
-          "#{@players[1][:name]} your score was #{@players[1][:score]}.\n\e[0m")
-    
+          "#{@players[1][:name]} your score was #{@players[1][:score]}.\n\e[0m"
+    endmenu
   end
 end
 
@@ -79,16 +78,36 @@ def set_names
   @setnameflag = true
 end
 
-loop do
-  unless @setnameflag
-    set_names
-  end
-  @players.each do |player|
-    generate_question
-    prompt(player[:id])
-    verify
-    # byebug
-    checkforloser(player[:id])
-    scores(player[:id])
+def resetlives
+  @players[0][:lives] = LIVES
+  @players[1][:lives] = LIVES
+end
+
+def endmenu
+  puts "New game? (Y/N)"
+  input = gets.chomp.upcase
+  if input == "Y"
+    resetlives
+    start
+  else
+    abort("\nThanks for playing!\n")
   end
 end
+
+def start
+  loop do
+    unless @setnameflag
+      set_names
+    end
+    @players.each do |player|
+      generate_question
+      prompt(player[:id])
+      verify
+      # byebug
+      checkforloser(player[:id])
+      scores(player[:id])
+    end
+  end
+end
+
+start
