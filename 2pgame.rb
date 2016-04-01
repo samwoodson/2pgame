@@ -1,29 +1,35 @@
 require 'byebug'
 require 'colorize'
+@setnameflag = false
 LIVES = 3
+OPERATIONS = [:+, :*, :-]
 
 @players = [
   {
     id: 1,
     lives: LIVES,
-    score: 0
+    score: 0,
+    name: ''
+
   },
   {
     id: 2,
     lives: LIVES,
-    score: 0
+    score: 0,
+    name: ''
   }
 ]
 
-def prompt(player_num)
-  puts "Player #{player_num}: What is #{@num1} plus #{@num2}?"
-  @response = gets.chomp.to_i
-end
-
 def generate_question
+  @sign = OPERATIONS[rand(0..2)]
   @num1 = rand(1..20).to_i
   @num2 = rand(1..20).to_i
-  @answer = (@num1 + @num2)
+  @answer = @num1.send(@sign, @num2)
+end
+
+def prompt(player_num)
+  puts "#{@players[player_num - 1][:name]}: What is #{@num1} #{@sign} #{@num2}?"
+  @response = gets.chomp.to_i
 end
 
 def verify
@@ -37,35 +43,52 @@ def scores(player_key)
       puts "Correct!"
       puts "\e[0m"
     else 
-      @players[player_key - 1][:lives] -= 1
-      puts "\e[31m"
-      puts "Wrong! You have #{@players[player_key - 1][:lives]} lives left!"
-      puts "\e[0m"
+        @players[player_key - 1][:lives] -= 1
+        if @players[player_key - 1][:lives] > 1
+        puts "\e[31m"
+        puts "Wrong! #{@players[player_key - 1][:name]} you have #{@players[player_key - 1][:lives]} lives left!"
+        puts "\e[0m"
+        show_scores
+      else
+        puts "\e[31m"
+        puts "Wrong! #{@players[player_key - 1][:name]} you have 1 life left!"
+        puts "\e[0m"
+    end
   end
 end
 
 def show_scores
-  puts "Player #{@players[0][:id]} your score is #{@players[0][:score]}."
-  puts "Player #{@players[1][:id]} your score is #{@players[1][:score]}."
+  puts "#{@players[0][:name]} your score is #{@players[0][:score]}."
+  puts "#{@players[1][:name]} your score is #{@players[1][:score]}."
 end
 
 def checkforloser(player_key)
-  if @players[player_key - 1][:lives] == 0
-    abort("Player #{@players[player_key - 1][:id]}, you have lost all your lives, game over! "\
-          "Player #{@players[0][:id]} your score was #{@players[0][:score]}, "\
-          "Player #{@players[1][:id]} your score was #{@players[1][:score]}.")
+  if @players[player_key - 1][:lives] == 1 && !verify
+    abort("\e[31m\nWrong! #{@players[player_key - 1][:name]}, you have lost all your lives, game over!\n\e[0m"\
+          "\e[32m\n#{@players[0][:name]} your score was #{@players[0][:score]}, "\
+          "#{@players[1][:name]} your score was #{@players[1][:score]}.\n\e[0m")
     
   end
 end
 
+def set_names
+  puts "Player 1 please enter your name:"
+  @players[0][:name] += gets.chomp
+  puts "Player 2 please enter your name:"
+  @players[1][:name] += gets.chomp
+  @setnameflag = true
+end
+
 loop do
+  unless @setnameflag
+    set_names
+  end
   @players.each do |player|
     generate_question
     prompt(player[:id])
     verify
     # byebug
-    scores(player[:id])
     checkforloser(player[:id])
-    show_scores
+    scores(player[:id])
   end
 end
