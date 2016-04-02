@@ -2,6 +2,7 @@ require './2pgame'
 
 def start
   initialize_players
+  set_players
   set_names
   run
 end
@@ -9,10 +10,10 @@ end
 def run
     @players.each do |player|
       generate_question
-      prompt(player.name)
-      verify
-      endifloser(player)
-      scores(player)
+      prompt_for_answer(player.name)
+      verify?
+      end_if_loser(player)
+      update_scores(player)
     end
   run
 end

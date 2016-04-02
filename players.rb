@@ -1,12 +1,10 @@
-# require './2pgame'
-require 'colorize'
 class Player
   attr_accessor :name, :id, :lives, :score
 
   def initialize(name, id)
-    @name = name,
-    @id = id,
-    @lives = LIVES,
+    @name = name
+    @id = id
+    @lives = LIVES
     @score = 0
   end
 
